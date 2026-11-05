@@ -1,0 +1,7 @@
+#ifndef WC_CONSTANTS_H
+#define WC_CONSTANTS_H
+
+#define WC_MAX_PATH_LEN 4096
+#define WC_MAX_FILES_BUF 1048576
+
+#endif // WC_CONSTANTS_H
