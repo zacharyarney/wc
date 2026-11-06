@@ -43,6 +43,7 @@ DEPS := $(OBJS:.o=.d)
 
 .PHONY: all clean
 
+# Main target
 all: $(BIN_DIR)/$(TARGET_EXE)
 
 # Final build step
@@ -59,6 +60,10 @@ $(OBJ_DIR)/%.o: $(SRC_DIRS)/%.c
 clean:
 	rm -rf $(OBJ_DIR)
 	rm -rf $(BIN_DIR)
+
+compdb: clean
+	bear -- $(MAKE) all
+
 
 # Include the .d makefiles. Preceding dash suppresses errors from missing .d files on initial run
 -include $(DEPS)
