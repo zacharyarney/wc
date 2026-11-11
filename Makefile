@@ -20,7 +20,12 @@ WARNING_FLAGS ?= -Wall -Werror -Wextra
 STD_FLAGS ?= -std=$(CSTD) -pedantic
 INCLUDE_FLAGS ?= -I./src
 DEPFLAGS ?= -MMD -MP
-CFLAGS ?= $(WARNING_FLAGS) $(STD_FLAGS) $(INCLUDE_FLAGS) $(DEPFLAGS)
+
+ifeq ($(shell uname), Darwin)	# append system SDK root for MacOS
+SYSROOT_FLAGS := -isysroot $(shell xcrun --show-sdk-path)
+endif
+
+CFLAGS = $(WARNING_FLAGS) $(STD_FLAGS) $(INCLUDE_FLAGS) $(DEPFLAGS) $(SYSROOT_FLAGS)
 
 # Linker flags
 LDFLAGS ?= -v
