@@ -1,5 +1,8 @@
 #include "args.h"
 
+#include "constants.h"
+
+#include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -8,16 +11,17 @@
 
 static bool endOfArgs = false;
 
-static const char *illegalOptText = "wc: invalid option -- ";
+static const char *illegalOptText = "wcz: invalid option -- ";
 static const char *usageText = "usage: [-lwmcL] [file ...]";
 
 
-bool isDefault(const uint8_t bitFlags) {
-    return bitFlags == 0;
-}
-
-
-int setShortFlags(const char *cmdLineFlags, uint8_t *bitFlags) {
+/**
+ * Iterates through flags after single-dash arg.
+ * @param cmdLineFlags
+ * @param bitFlags
+ * @return 0 on success or -1 on failure
+ */
+static int setShortFlags(const char *cmdLineFlags, uint8_t *bitFlags) {
     const size_t argLen = strlen(cmdLineFlags);
 
     for (size_t ii = 1; ii < argLen; ii++) {
@@ -45,7 +49,7 @@ int setShortFlags(const char *cmdLineFlags, uint8_t *bitFlags) {
         default:
             printf("%s%c\n", illegalOptText, cmdLineFlags[ii]);
             printf("%s\n", usageText);
-            return 1;
+            return -1;
         }
     }
     return 0;
@@ -53,20 +57,29 @@ int setShortFlags(const char *cmdLineFlags, uint8_t *bitFlags) {
 
 
 int parseArgs(const int argsCount, char *args[], uint8_t *bitFlags) {
-    for (int i = 1; i < argsCount; i++) {
+    int i;
+    for (i = 1; i < argsCount; i++) {
         char *curArg = args[i];
+        if (strcmp(curArg, "-") == 0) {
+            endOfArgs = true;
+            break;
+        }
         if (strcmp(curArg, "--") == 0 && !endOfArgs) {
             endOfArgs = true;
-            printf("This is the end of the arguments. All files from here on out\n");
+            printf("This is the end of the arguments.\n");
             continue;
         }
         if (curArg[0] == '-' && !endOfArgs) {
             printf("argv[%d]: %s (length=%lu)\n", i, curArg, strlen(curArg));
-            if (setShortFlags(curArg, bitFlags) != 0) return 1;
+            if (setShortFlags(curArg, bitFlags) != 0) return -1;
             continue;
         }
         endOfArgs = true;
         printf("This is a file. Try to open it. See what happens\n");
+        break;
     }
-    return 0;
+
+    // default args are -clw
+    *bitFlags = *bitFlags ? *bitFlags : FLAG_LINES | FLAG_WORDS | FLAG_BYTES;
+    return i;
 }
